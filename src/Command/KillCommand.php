@@ -25,7 +25,7 @@ final class KillCommand extends Command
     /**
      * @throws \InvalidArgumentException
      */
-    protected function execute(InputInterface $input, OutputInterface $output): void
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $path = $input->getOption('path');
         $byteFormat = $input->getOption('byte-format');
@@ -38,8 +38,11 @@ final class KillCommand extends Command
             \readline_callback_handler_install('', static function (): void {});
 
             while (true) {
+                $read = [STDIN];
+                $write = null;
+                $except = null;
                 if (
-                    @\stream_select($read = [STDIN], $write = null, $except = null, null)
+                    @\stream_select($read, $write, $except, null)
                     && \in_array(STDIN, $read, true)
                 ) {
                     switch (\stream_get_contents(STDIN, 1)) {
@@ -66,5 +69,7 @@ final class KillCommand extends Command
         })($outputHandler));
 
         $inputHandler->run();
+
+        return 1;
     }
 }
